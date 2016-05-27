@@ -83,10 +83,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Json.cs" />
     <Compile Include="Modules\ModeratorModule.cs" />
+    <Compile Include="Modules\ModeratorSettings.cs" />
     <Compile Include="PermissionLevel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

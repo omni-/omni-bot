@@ -7,6 +7,8 @@ using Discord;
 using Discord.Modules;
 using Discord.Commands;
 using Discord.Commands.Permissions.Levels;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace omni_bot
 {
@@ -15,10 +17,16 @@ namespace omni_bot
         private ModuleManager manager;
         private DiscordClient client;
 
+        private string settingspath = "modules/moderator/moderatorsettings.json";
+
+        private ModeratorSettings settings;
+
         void IModule.Install(ModuleManager Manager)
         {
             manager = Manager;
             client = Manager.Client;
+
+            settings = Json.InitSettings<ModeratorSettings>(settingspath);
 
             client.GetService<CommandService>().CreateGroup("", g =>
             {
@@ -96,18 +104,14 @@ namespace omni_bot
                         await e.Channel.SendMessage($"Undeafened {user.Name}.");
                     });
             });
-            manager.MessageReceived += async (s, e) =>
+
+            client.MessageReceived += async (s, e) =>
             {
-                await e.Message.Delete();
+                Console.WriteLine($"[{e.User.Name}] {e.Message.RawText}");
+                if (e.Message.IsAuthor) return;
+                if (settings.BannedWords.Any(w => e.Message.Text.ToLower().Contains(w)))
+                    await e.Message.Delete();
             };
-            //client.MessageReceived += async (s, e) =>
-            //{
-            //    await e.Message.Delete();
-            //    Console.WriteLine($"[{e.User.Name}] {e.Message.RawText}");
-            //    var badwords = new List<String> { "bad1", "bad2", "bad3" };
-            //    if (badwords.Any(w => e.Message.Text.ToLower().Contains(w)))
-            //        await e.Message.Delete();
-            //};
         }
     }
 }

@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.Modules;
 using Discord.Audio;
 using Discord.Commands.Permissions.Levels;
+using Newtonsoft.Json;
 
 namespace omni_bot
 {
@@ -13,17 +14,27 @@ namespace omni_bot
 
         private DiscordClient _client;
 
+        private string settingspath = "settings.json";
+
+        private Settings settings;
+
         public void Start()
         {
             Console.Title = "0MN1-2000 - your friendly neighborhood bot";
+            Json.InitDirs();
+            settings = Json.InitSettings<Settings>(settingspath);
+
             _client = new DiscordClient(x =>
             {
                 x.AppName = "0MN1-2000";
+                x.AppUrl = settings.RepoPath;
+                x.AppVersion = settings.Version;
                 x.LogLevel = LogSeverity.Debug;
+                x.UsePermissionsCache = true;
             })
             .UsingCommands(x =>
             {
-                x.PrefixChar = '/';
+                x.PrefixChar = settings.CommandChar;
                 x.HelpMode = HelpMode.Public;
                 x.ErrorHandler = OnCommandError;
             })
@@ -41,12 +52,13 @@ namespace omni_bot
 
             _client.UserJoined += async (s, e) =>
             {
+                Console.WriteLine($"{e.User.Name} joined");
                 await e.Server.DefaultChannel.SendMessage($"{e.User.Name} joined.");
             };
 
             _client.ExecuteAndWait(async () =>
             {
-                await _client.Connect("MTg0OTA3OTkyNjYyMDE2MDAw.CibQfQ.Mqxd6nKGL93drNZS_OwMVUS9wQY");
+                await _client.Connect(settings.BotToken);
             });
         }
         private void OnCommandError(object sender, CommandErrorEventArgs e)
@@ -81,7 +93,7 @@ namespace omni_bot
         }
         private int PermissionResolver(User user, Channel channel)
         {
-            if (user.Id == 112089455933792256)
+            if (user.Id == settings.OwnerID)
                 return (int)PermissionLevel.BotOwner;
             if (user.Server != null)
             {
