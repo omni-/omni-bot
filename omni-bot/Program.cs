@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.Modules;
 using Discord.Audio;
 using Discord.Commands.Permissions.Levels;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace omni_bot
@@ -59,6 +60,7 @@ namespace omni_bot
             _client.ExecuteAndWait(async () =>
             {
                 await _client.Connect(settings.BotToken);
+                Console.Title += $" [online users: {_client.Servers.SelectMany(s => s.Users.Select(u => u.Id)).Distinct().Count()}";
             });
         }
         private void OnCommandError(object sender, CommandErrorEventArgs e)
